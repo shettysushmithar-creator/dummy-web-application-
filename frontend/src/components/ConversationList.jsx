@@ -79,7 +79,7 @@ export default function ConversationList({ messages, onSelect, selectedId, activ
                         <div className="card-header">
                             <span className="customer-name">{conv.name}</span>
                             <span className="timestamp">
-                                {new Date(conv.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(conv.timestamp * 1000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
                             </span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>

@@ -31,7 +31,7 @@ const initDb = async () => {
         message_text TEXT,
         message_type TEXT,
         status TEXT,
-        timestamp TIMESTAMP
+        timestamp TIMESTAMPTZ
     `;
     try {
         // Keep the old shared table (preserves existing data)
@@ -45,7 +45,7 @@ const initDb = async () => {
                 message_type TEXT,
                 status TEXT,
                 platform TEXT,
-                timestamp BIGINT
+                timestamp TIMESTAMPTZ
             );
         `);
         // Create separate tables per platform
@@ -209,6 +209,11 @@ app.get('/api/messages', async (req, res) => {
             UNION ALL
             SELECT id, sender_id, receiver_id, message_text, message_type, timestamp, 'facebook' AS platform
             FROM facebook_messages
+            UNION ALL
+            SELECT id, sender_id, receiver_id, message_text, message_type,
+                timestamp AS timestamp,
+                COALESCE(platform, 'whatsapp') AS platform
+            FROM meta_crm_messages
             ORDER BY timestamp DESC
         `);
         const messages = result.rows.map(row => ({

@@ -83,7 +83,7 @@ export default function ChatWindow({ conversation }) {
                     }}>
                         {msg.text}
                         <div className="message-meta" style={{ fontSize: '0.7rem', marginTop: '4px', opacity: 0.7, textAlign: 'right' }}>
-                            {new Date(msg.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(msg.timestamp * 1000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
                         </div>
                     </div>
                 ))}
