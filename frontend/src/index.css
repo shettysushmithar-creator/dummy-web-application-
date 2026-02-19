@@ -256,7 +256,7 @@ body {
 }
 
 .login-card {
-  background: rgba(174, 148, 148, 0.05);
+  background-color: #eff6ff;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(152, 141, 141, 0.15);
   border-radius: 20px;
@@ -282,13 +282,13 @@ body {
 .login-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #fff;
+  color: #4b88ea;
   margin-bottom: 0.25rem;
 }
 
 .login-subtitle {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(21, 97, 203, 0.6);
 }
 
 .login-platforms {
@@ -381,6 +381,37 @@ body {
   border-color: #60a5fa;
   background: rgba(255, 255, 255, 0.12);
 }
+
+/* Password show/hide toggle */
+.login-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-password-wrapper input {
+  flex: 1;
+  padding-right: 3rem !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: #60a5fa;
+}
+
 
 .login-btn {
   margin-top: 0.5rem;

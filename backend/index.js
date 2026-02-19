@@ -21,9 +21,20 @@ app.use((req, res, next) => {
     next();
 });
 
-// Initialize Database Table (Modified to match your actual pgAdmin columns)
+// Initialize Database Tables — one per platform
 const initDb = async () => {
+    const tableSchema = `
+        id SERIAL PRIMARY KEY,
+        provider_message_id TEXT UNIQUE,
+        sender_id TEXT NOT NULL,
+        receiver_id TEXT,
+        message_text TEXT,
+        message_type TEXT,
+        status TEXT,
+        timestamp TIMESTAMP
+    `;
     try {
+        // Keep the old shared table (preserves existing data)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS meta_crm_messages (
                 id SERIAL PRIMARY KEY,
@@ -37,7 +48,11 @@ const initDb = async () => {
                 timestamp BIGINT
             );
         `);
-        console.log('✅ Database Ready: meta_crm_messages table active.');
+        // Create separate tables per platform
+        await pool.query(`CREATE TABLE IF NOT EXISTS whatsapp_messages (${tableSchema});`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS instagram_messages (${tableSchema});`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS facebook_messages (${tableSchema});`);
+        console.log('✅ Database Ready: 3 platform tables active (whatsapp, instagram, facebook).');
     } catch (err) {
         console.error('❌ Database Initialization Error:', err);
     }
@@ -154,13 +169,21 @@ app.post('/api/webhook', async (req, res) => {
 
     if (msgData) {
         try {
-            await pool.query(`
-                INSERT INTO meta_crm_messages (provider_message_id, sender_id, receiver_id, message_text, message_type, platform, timestamp)
-                VALUES ($1, $2, $3, $4, $5, $6, to_timestamp($7))
-                ON CONFLICT (provider_message_id) DO NOTHING
-            `, [msgData.provider_message_id, msgData.sender_id, msgData.receiver_id, msgData.message_text, msgData.message_type, msgData.platform, msgData.timestamp]);
+            // Route to the correct platform table
+            const tableMap = {
+                whatsapp: 'whatsapp_messages',
+                instagram: 'instagram_messages',
+                facebook: 'facebook_messages'
+            };
+            const tableName = tableMap[msgData.platform] || 'meta_crm_messages';
 
-            console.log(`✅ [${msgData.platform.toUpperCase()}] Saved message from ${msgData.sender_id}`);
+            await pool.query(`
+                INSERT INTO ${tableName} (provider_message_id, sender_id, receiver_id, message_text, message_type, timestamp)
+                VALUES ($1, $2, $3, $4, $5, to_timestamp($6))
+                ON CONFLICT (provider_message_id) DO NOTHING
+            `, [msgData.provider_message_id, msgData.sender_id, msgData.receiver_id, msgData.message_text, msgData.message_type, msgData.timestamp]);
+
+            console.log(`✅ [${msgData.platform.toUpperCase()}] Saved to ${tableName}: "${msgData.message_text}"`);
         } catch (err) {
             console.error('❌ Error saving to DB:', err.message);
         }
@@ -174,16 +197,26 @@ app.post('/api/webhook', async (req, res) => {
     }
 });
 
-// 3. API for Frontend (FETCH MESSAGES)
+// 3. API for Frontend (FETCH MESSAGES) — reads from all 3 platform tables
 app.get('/api/messages', async (req, res) => {
     try {
-        const result = await pool.query('SELECT *, EXTRACT(EPOCH FROM (timestamp AT TIME ZONE \'UTC\')) as unix_seconds FROM meta_crm_messages ORDER BY timestamp DESC');
+        const result = await pool.query(`
+            SELECT id, sender_id, receiver_id, message_text, message_type, timestamp, 'whatsapp' AS platform
+            FROM whatsapp_messages
+            UNION ALL
+            SELECT id, sender_id, receiver_id, message_text, message_type, timestamp, 'instagram' AS platform
+            FROM instagram_messages
+            UNION ALL
+            SELECT id, sender_id, receiver_id, message_text, message_type, timestamp, 'facebook' AS platform
+            FROM facebook_messages
+            ORDER BY timestamp DESC
+        `);
         const messages = result.rows.map(row => ({
             id: row.id,
             from: row.sender_id,
             text: row.message_text,
-            timestamp: Math.floor(row.unix_seconds),
-            type: row.platform || 'whatsapp'
+            timestamp: Math.floor(new Date(row.timestamp).getTime() / 1000),
+            type: row.platform
         }));
         res.json(messages);
     } catch (err) {
