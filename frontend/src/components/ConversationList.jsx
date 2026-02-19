@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
-export default function ConversationList({ messages, onSelect, selectedId }) {
-    const [activeFilter, setActiveFilter] = useState('all');
+export default function ConversationList({ messages, onSelect, selectedId, activeFilter, onFilterChange }) {
 
     // Group messages by 'from' (phone number/user ID) to create conversation threads
     const conversations = Object.values(messages.reduce((acc, msg) => {
@@ -63,7 +62,7 @@ export default function ConversationList({ messages, onSelect, selectedId }) {
                     <div
                         key={tab.value}
                         className={`tab ${activeFilter === tab.value ? 'active' : ''}`}
-                        onClick={() => setActiveFilter(tab.value)}
+                        onClick={() => onFilterChange(tab.value)}
                         style={{ cursor: 'pointer' }}
                     >
                         {tab.label}

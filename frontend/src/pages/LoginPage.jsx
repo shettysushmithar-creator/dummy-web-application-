@@ -3,79 +3,63 @@ import { useState } from 'react';
 export default function LoginPage({ onLogin }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Dummy login logic
         if (email && password) {
             onLogin();
+        } else {
+            setError('Please enter your email and password.');
         }
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-            backgroundColor: '#f3f4f6'
-        }}>
-            <div style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                width: '100%',
-                maxWidth: '400px'
-            }}>
-                <h2 style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#111827' }}>Sign in to CRM</h2>
-                <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Email</label>
+        <div className="login-wrapper">
+            <div className="login-card">
+                {/* Logo / Brand */}
+                <div className="login-brand">
+                    <div className="login-logo">💬</div>
+                    <h1 className="login-title">Meta AI CRM</h1>
+                    <p className="login-subtitle">Sign in to your unified inbox</p>
+                </div>
+
+                {/* Platform badges */}
+                <div className="login-platforms">
+                    <span className="platform-dot wa">WhatsApp</span>
+                    <span className="platform-dot fb">Messenger</span>
+                    <span className="platform-dot ig">Instagram</span>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="login-form">
+                    {error && <div className="login-error">{error}</div>}
+                    <div className="login-field">
+                        <label>Email</label>
                         <input
                             type="email"
+                            placeholder="you@business.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '0.375rem'
-                            }}
                             required
                         />
                     </div>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Password</label>
+                    <div className="login-field">
+                        <label>Password</label>
                         <input
                             type="password"
+                            placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '0.375rem'
-                            }}
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            backgroundColor: '#2563eb',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '0.375rem',
-                            fontWeight: '500',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Sign In
+                    <button type="submit" className="login-btn">
+                        Sign In →
                     </button>
                 </form>
+
+                <p className="login-footer">Powered by Meta Webhooks</p>
             </div>
         </div>
     );

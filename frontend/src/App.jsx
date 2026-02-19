@@ -4,12 +4,15 @@ import Sidebar from './components/Sidebar';
 import ConversationList from './components/ConversationList';
 import ChatWindow from './components/ChatWindow';
 import LoginPage from './pages/LoginPage';
+import SettingsPage from './pages/SettingsPage';
 import './index.css';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [messages, setMessages] = useState([]);
   const [selectedConv, setSelectedConv] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [activePage, setActivePage] = useState('inbox'); // 'inbox' or 'settings'
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -31,13 +34,26 @@ export default function App() {
 
   return (
     <div className="unified-inbox">
-      <Sidebar />
-      <ConversationList
-        messages={messages}
-        onSelect={setSelectedConv}
-        selectedId={selectedConv?.id}
+      <Sidebar
+        activeFilter={activeFilter}
+        onFilterChange={(val) => { setActiveFilter(val); setActivePage('inbox'); }}
+        activePage={activePage}
+        onPageChange={setActivePage}
       />
-      <ChatWindow conversation={selectedConv} />
+      {activePage === 'settings' ? (
+        <SettingsPage />
+      ) : (
+        <>
+          <ConversationList
+            messages={messages}
+            onSelect={setSelectedConv}
+            selectedId={selectedConv?.id}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+          <ChatWindow conversation={selectedConv} />
+        </>
+      )}
     </div>
   );
 }
